@@ -252,13 +252,21 @@
             { id: 'img3', title: 'Sóng lừng ngoài khơi Kanagawa', author: 'Katsushika Hokusai', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvOEEN0Q0yo1FT1eEV6OABHyuNABr3_LzX-g&s' },
             { id: 'img4', title: 'Tiếng thét', author: 'Edvard Munch', url: 'https://upload.wikimedia.org/wikipedia/vi/a/a4/Scr.JPG' },
             { id: 'img5', title: 'Trái Đất mọc từ Mặt Trăng', author: 'William Anders (NASA)', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/NASA-Apollo8-Dec24-Earthrise.jpg/330px-NASA-Apollo8-Dec24-Earthrise.jpg' },
-            { id: 'img6', title: 'Chú ong hút mật', author: 'Jon Sullivan', url: 'https://news.fondriest.com/wp-content/uploads/2015/06/HoneyBee.jpg' }
+            { id: 'img6', title: 'Chú ong hút mật', author: 'Jon Sullivan', url: 'https://news.fondriest.com/wp-content/uploads/2015/06/HoneyBee.jpg' },
+            { id: 'img7', title: 'Thiếu nữ bên hoa huệ', author: 'Tô Ngọc Vân', url: 'https://upload.wikimedia.org/wikipedia/vi/thumb/9/94/Thieu_nu_ben_hoa_hue.jpg/400px-Thieu_nu_ben_hoa_hue.jpg' },
+            { id: 'img8', title: 'Hai thiếu nữ và em bé', author: 'Tô Ngọc Vân', url: 'https://upload.wikimedia.org/wikipedia/vi/thumb/5/5f/Htlvembe.jpg/400px-Htlvembe.jpg' },
+            { id: 'img9', title: 'Đám cưới chuột', author: 'Tranh dân gian Đông Hồ', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Dam_cuoi_chuot.jpg/640px-Dam_cuoi_chuot.jpg' },
+            { id: 'img10', title: 'Bình văn', author: 'Lê Văn Miến', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/B%C3%ACnh_V%C4%83n_-_L%C3%AA_V%C4%83n_Mi%C3%BFn.jpg/640px-B%C3%ACnh_V%C4%83n_-_L%C3%AA_V%C4%83n_Mi%C3%BFn.jpg' }
         ];
 
         const musics = [
             { id: 'mus1', title: 'Bản giao hưởng số 5', author: 'Ludwig van Beethoven' },
             { id: 'mus2', title: 'Bốn mùa - Mùa xuân', author: 'Antonio Vivaldi' },
-            { id: 'mus3', title: 'Canon trưởng', author: 'Johann Pachelbel' }
+            { id: 'mus3', title: 'Canon trưởng', author: 'Johann Pachelbel' },
+            { id: 'mus4', title: 'Trống cơm', author: 'Dân ca Bắc Bộ' },
+            { id: 'mus5', title: 'Lý cây bông', author: 'Dân ca Nam Bộ' },
+            { id: 'mus6', title: 'Bèo dạt mây trôi', author: 'Dân ca Quan họ Bắc Ninh' },
+            { id: 'mus7', title: 'Tiến quân ca', author: 'Văn Cao' }
         ];
 
         // --- 2. CẤU TRÚC NHIỆM VỤ ---
@@ -413,9 +421,9 @@
         }
         
         function checkAuthorMatch(input, author) {
-            const normalizedInput = removeAccents(input);
-            const normalizedAuthor = removeAccents(author);
-            return normalizedInput.includes(normalizedAuthor);
+            const normalizedInput = removeAccents(input).trim();
+            const normalizedAuthor = removeAccents(author).trim();
+            return normalizedInput === normalizedAuthor;
         }
 
         function submitPost() {
@@ -470,7 +478,7 @@
             }
 
             if (!isValid) {
-                showError("Tên tác giả chưa chính xác, bạn kiểm tra lại nhé!");
+                showError("Bạn ghi sai tên tác giả rồi! Phải ghi chính xác tên tác giả/nguồn nhé.");
                 return;
             }
 
