@@ -247,12 +247,12 @@
     <script>
         // --- 1. DỮ LIỆU PHƯƠNG TIỆN ---
         const images = [
-            { id: 'img1', title: 'Đêm đầy sao', author: 'Vincent van Gogh', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/640px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg' },
-            { id: 'img2', title: 'Mona Lisa', author: 'Leonardo da Vinci', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/640px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg' },
-            { id: 'img3', title: 'Sóng lừng ngoài khơi Kanagawa', author: 'Katsushika Hokusai', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/640px-The_Great_Wave_off_Kanagawa.jpg' },
-            { id: 'img4', title: 'Tiếng thét', author: 'Edvard Munch', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/640px-The_Scream.jpg' },
-            { id: 'img5', title: 'Trái Đất mọc từ Mặt Trăng', author: 'William Anders', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/NASA-Apollo8-Dec24-Earthrise.jpg/640px-NASA-Apollo8-Dec24-Earthrise.jpg' },
-            { id: 'img6', title: 'Chú ong hút mật', author: 'Jon Sullivan', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Apis_mellifera_Western_honey_bee.jpg/640px-Apis_mellifera_Western_honey_bee.jpg' }
+            { id: 'img1', title: 'Đêm đầy sao', author: 'Vincent van Gogh', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJxcAWJ6r2_5YO0sEyKsPeOr9BjXhcVSKqIi8Sv91ofguM1pb_ifWmjIVEqdMadGHPZ-fFfubcHy0ImtrOvvI-XpBJc5k2Hn1xfvD3kg&s=10' },
+            { id: 'img2', title: 'Mona Lisa', author: 'Leonardo da Vinci', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXwwxPH6_3mjUprizg7M8DtzDpUJuOcHnI8t3x0mztWt4OV7j8r2fU3Pa9L-pmx7AlPcUiZbjEi7zcJdNNgtQs6w1T7os1tYLo__BFOg&s=10' },
+            { id: 'img3', title: 'Sóng lừng ngoài khơi Kanagawa', author: 'Katsushika Hokusai', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvOEEN0Q0yo1FT1eEV6OABHyuNABr3_LzX-g&s' },
+            { id: 'img4', title: 'Tiếng thét', author: 'Edvard Munch', url: 'https://upload.wikimedia.org/wikipedia/vi/a/a4/Scr.JPG' },
+            { id: 'img5', title: 'Trái Đất mọc từ Mặt Trăng', author: 'William Anders (NASA)', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/NASA-Apollo8-Dec24-Earthrise.jpg/330px-NASA-Apollo8-Dec24-Earthrise.jpg' },
+            { id: 'img6', title: 'Chú ong hút mật', author: 'Jon Sullivan', url: 'https://news.fondriest.com/wp-content/uploads/2015/06/HoneyBee.jpg' }
         ];
 
         const musics = [
@@ -329,9 +329,14 @@
                 grid.className = "p-4 flex-1 overflow-y-auto grid grid-cols-2 gap-4 auto-rows-max bg-gray-50";
                 images.forEach(img => {
                     grid.innerHTML += `
-                        <div onclick="selectMedia('image', '${img.id}')" class="bg-white border-2 border-transparent rounded-[16px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md hover:border-primary transition transform hover:-translate-y-1">
-                            <div class="h-32 bg-gray-200 bg-cover bg-center" style="background-image: url('${img.url}')"></div>
-                            <div class="p-3 text-center text-sm font-bold text-gray-800 line-clamp-1" title="${img.title}">${img.title}</div>
+                        <div onclick="selectMedia('image', '${img.id}')" class="bg-white border-2 border-transparent rounded-[16px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md hover:border-primary transition transform hover:-translate-y-1 flex flex-col">
+                            <div class="h-32 bg-gray-100 overflow-hidden flex-shrink-0">
+                                <img src="${img.url}" alt="${img.title}" class="object-cover w-full h-full">
+                            </div>
+                            <div class="p-3 text-center flex flex-col justify-center flex-1">
+                                <div class="text-sm font-bold text-gray-800 line-clamp-1" title="${img.title}">${img.title}</div>
+                                <div class="text-xs text-gray-500 line-clamp-1 mt-0.5" title="Tác giả: ${img.author}">Tác giả: ${img.author}</div>
+                            </div>
                         </div>
                     `;
                 });
@@ -384,7 +389,7 @@
             let html = '';
             
             if (selectedImage) {
-                html += `<img src="${selectedImage.url}" class="max-h-40 rounded-[10px] mx-auto object-contain shadow-sm">`;
+                html += `<img src="${selectedImage.url}" alt="${selectedImage.title}" class="max-h-40 rounded-[10px] mx-auto object-contain shadow-sm" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Lỗi+Hình+Ảnh';">`;
             }
             
             if (selectedMusic) {
