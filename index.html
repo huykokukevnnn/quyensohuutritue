@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiệp sĩ Sở hữu Trí tuệ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for Fireworks -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1877F2',
+                        secondary: '#E4E6EB',
+                        bglight: '#F0F2F5',
+                        accent: '#FFB800'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F0F2F5;
+            overflow: hidden; /* Cố định màn hình, không cuộn dọc toàn trang */
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Hiệu ứng chữ chạy ngang cho tên bài nhạc */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .marquee-text {
+            display: inline-block;
+            animation: marquee 8s linear infinite;
+            padding-left: 100%;
+            font-weight: bold;
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        /* Custom Scrollbar cho Newsfeed và Library */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Hiệu ứng trượt cho Media Panel */
+        .media-panel {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(120%);
+            z-index: 50;
+        }
+        .media-panel.open {
+            transform: translateX(0);
+        }
+
+        /* Task Panel kéo thả */
+        #taskPanel {
+            position: absolute;
+            z-index: 40;
+        }
+        #taskPanelHeader {
+            cursor: grab;
+        }
+        #taskPanelHeader:active {
+            cursor: grabbing;
+        }
+
+        /* Hiệu ứng trượt khi đăng bài */
+        .post-entry {
+            animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        @keyframes slideDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-row p-4 gap-4 box-border relative">
+
+    <!-- CỘT TRÁI: KHUNG ĐĂNG BÀI & NEWSFEED (60%) -->
+    <div class="w-[60%] flex flex-col gap-4 h-full relative z-10">
+        
+        <!-- Post Composer -->
+        <div class="bg-white rounded-[24px] shadow-sm p-5 flex flex-col gap-3 flex-shrink-0 border border-gray-200 relative overflow-hidden">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-primary text-2xl font-bold shadow-inner">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800 leading-tight">Tạo bài chia sẻ</h2>
+                    <p class="text-xs text-gray-500 font-semibold">Cùng tôn trọng tác giả nhé!</p>
+                </div>
+            </div>
+            
+            <textarea id="postContent" class="w-full bg-bglight rounded-[16px] p-4 border-none outline-none resize-none text-gray-700 font-medium placeholder-gray-500 transition focus:ring-2 focus:ring-blue-200" rows="2" placeholder="Bạn đang nghĩ gì về tác phẩm này?"></textarea>
+            
+            <div class="flex flex-col gap-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-feather-pointed text-gray-400"></i>
+                    </div>
+                    <input type="text" id="postAuthor" class="w-full bg-bglight rounded-[16px] pl-10 p-3 border-none outline-none text-gray-700 font-bold placeholder-gray-500 transition focus:ring-2 focus:ring-blue-200" placeholder="Tên tác giả / Nguồn...">
+                </div>
+                <span id="errorMsg" class="text-red-500 text-sm ml-2 hidden font-bold animate-pulse">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i>Bạn ơi, nhớ ghi tên tác giả vào ô nguồn trước khi đăng nhé!
+                </span>
+            </div>
+
+            <!-- Preview Phương tiện đã chọn -->
+            <div id="mediaPreview" class="hidden relative border-2 border-dashed border-blue-200 rounded-[16px] p-2 bg-blue-50/50 flex flex-col items-center justify-center mt-2 transition-all">
+                <button onclick="clearMedia()" class="absolute -top-3 -right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md text-gray-500 hover:text-red-500 hover:bg-red-50 z-10 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div id="mediaPreviewContent" class="w-full text-center flex flex-col gap-2 items-center"></div>
+            </div>
+
+            <div class="flex justify-between items-center mt-2 pt-3 border-t border-gray-100">
+                <div class="flex gap-2">
+                    <button onclick="openMediaPanel('image')" class="flex items-center gap-2 px-4 py-2 hover:bg-green-50 rounded-full text-gray-600 font-bold transition duration-200">
+                        <i class="fa-regular fa-image text-green-500 text-xl"></i> Ảnh
+                    </button>
+                    <button onclick="openMediaPanel('music')" class="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 rounded-full text-gray-600 font-bold transition duration-200">
+                        <i class="fa-solid fa-music text-blue-500 text-xl"></i> Nhạc
+                    </button>
+                </div>
+                <button onclick="submitPost()" class="bg-primary hover:bg-blue-600 text-white font-bold py-2.5 px-8 rounded-full shadow-lg shadow-blue-500/30 transition transform hover:scale-105 active:scale-95 text-lg">
+                    Đăng bài
+                </button>
+            </div>
+        </div>
+
+        <!-- Newsfeed -->
+        <div id="newsfeed" class="flex-1 overflow-y-auto flex flex-col gap-4 pb-4 pr-2 rounded-[20px]">
+            <!-- Các bài viết sẽ hiển thị ở đây -->
+            <div class="text-center text-gray-400 font-semibold mt-10" id="emptyState">
+                <i class="fa-solid fa-newspaper text-5xl mb-3 opacity-50"></i>
+                <p>Chưa có bài viết nào. Hãy hoàn thành nhiệm vụ để đăng bài nhé!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI: BẢNG NHIỆM VỤ & THƯ VIỆN (40%) -->
+    <div class="w-[40%] h-full relative border-l-2 border-gray-200 border-dashed pl-4 flex flex-col items-center justify-center">
+        
+        <!-- Draggable Task Panel -->
+        <div id="taskPanel" class="bg-white rounded-[24px] shadow-xl border border-blue-100 w-[90%] left-[5%] top-[15%] p-6 flex flex-col bg-gradient-to-br from-white to-blue-50/30">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3" id="taskPanelHeader">
+                <h3 class="text-xl font-extrabold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-map-location-dot text-accent"></i> Thử thách
+                </h3>
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 mb-5 border border-blue-100 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+                <div class="text-sm text-blue-600 font-extrabold mb-2 uppercase tracking-wider flex justify-between items-center" id="taskProgress">
+                    <span>Nhiệm vụ 1/5</span>
+                    <i class="fa-solid fa-star text-accent"></i>
+                </div>
+                <div class="text-gray-800 font-bold text-[1.1rem] leading-snug" id="taskDescription">
+                    Đang tải nhiệm vụ...
+                </div>
+            </div>
+
+            <div class="w-full bg-gray-200 rounded-full h-3 mb-1 overflow-hidden shadow-inner">
+                <div id="progressBar" class="bg-gradient-to-r from-primary to-blue-400 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-gray-400 text-center mt-2 font-semibold">Cố gắng lên nhé!</p>
+        </div>
+
+        <!-- Media Library Panel -->
+        <div id="mediaPanel" class="media-panel absolute inset-y-0 right-0 left-4 bg-white rounded-[24px] shadow-2xl border border-gray-200 flex flex-col my-2 overflow-hidden">
+            <div class="p-5 bg-gradient-to-r from-primary to-blue-600 text-white flex justify-between items-center rounded-t-[24px]">
+                <h3 class="text-xl font-bold" id="mediaPanelTitle">Thư viện</h3>
+                <button onclick="closeMediaPanel()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="mediaGrid" class="p-4 flex-1 overflow-y-auto grid grid-cols-2 gap-4 auto-rows-max bg-gray-50">
+                <!-- Nội dung thư viện render bằng JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Reward (Hoàn thành) -->
+    <div id="successPopup" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] backdrop-blur-sm">
+        <div class="bg-white rounded-[32px] p-8 flex flex-col items-center max-w-md w-full shadow-2xl transform transition-all scale-100 text-center relative overflow-hidden border-4 border-white">
+            <div class="absolute -top-16 -left-16 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-50"></div>
+            <div class="absolute -bottom-16 -right-16 w-40 h-40 bg-yellow-200 rounded-full blur-3xl opacity-50"></div>
+            
+            <div class="relative">
+                <i class="fa-solid fa-medal text-7xl text-accent mb-2 animate-bounce"></i>
+                <i class="fa-solid fa-star text-yellow-500 absolute top-0 -right-2 animate-ping"></i>
+            </div>
+            
+            <h2 class="text-3xl font-extrabold text-primary mb-2 mt-4">Tuyệt Vời!</h2>
+            <p class="text-lg text-gray-600 mb-8 font-semibold">
+                Bạn đã vượt qua mọi thử thách và chính thức trở thành <br>
+                <span class="text-primary text-2xl mt-2 block font-black uppercase tracking-wide">Hiệp sĩ Sở hữu Trí tuệ</span>
+            </p>
+            <button onclick="resetApp()" class="bg-gradient-to-r from-primary to-blue-500 hover:from-blue-600 hover:to-blue-700 text-white font-extrabold py-3.5 px-10 rounded-full shadow-xl shadow-blue-500/40 transition transform hover:scale-110 active:scale-95 text-lg flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> Chơi lại từ đầu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DỮ LIỆU PHƯƠNG TIỆN ---
+        const images = [
+            { id: 'img1', title: 'Đêm đầy sao', author: 'Vincent van Gogh', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/640px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg' },
+            { id: 'img2', title: 'Mona Lisa', author: 'Leonardo da Vinci', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/640px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg' },
+            { id: 'img3', title: 'Sóng lừng ngoài khơi Kanagawa', author: 'Katsushika Hokusai', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/640px-The_Great_Wave_off_Kanagawa.jpg' },
+            { id: 'img4', title: 'Tiếng thét', author: 'Edvard Munch', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/640px-The_Scream.jpg' },
+            { id: 'img5', title: 'Trái Đất mọc từ Mặt Trăng', author: 'William Anders', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/NASA-Apollo8-Dec24-Earthrise.jpg/640px-NASA-Apollo8-Dec24-Earthrise.jpg' },
+            { id: 'img6', title: 'Chú ong hút mật', author: 'Jon Sullivan', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Apis_mellifera_Western_honey_bee.jpg/640px-Apis_mellifera_Western_honey_bee.jpg' }
+        ];
+
+        const musics = [
+            { id: 'mus1', title: 'Bản giao hưởng số 5', author: 'Ludwig van Beethoven' },
+            { id: 'mus2', title: 'Bốn mùa - Mùa xuân', author: 'Antonio Vivaldi' },
+            { id: 'mus3', title: 'Canon trưởng', author: 'Johann Pachelbel' }
+        ];
+
+        // --- 2. CẤU TRÚC NHIỆM VỤ ---
+        const allTasksTemplate = [
+            { type: 'any_image', text: 'Hãy đăng một bài viết có hình ảnh bất kỳ và ghi tên tác giả.' },
+            { type: 'any_music', text: 'Hãy đăng một bài viết chỉ có âm nhạc bất kỳ và ghi tên tác giả.' },
+            { type: 'image_and_music', text: 'Hãy đăng một bài viết có cả hình ảnh và âm nhạc bất kỳ, ghi tên cả 2 tác giả.' },
+            { type: 'specific_image', text: 'Hãy đăng một bài viết kèm bức tranh "Đêm đầy sao" và ghi tên tác giả của bức tranh đó.', targetId: 'img1', targetAuthor: 'Vincent van Gogh' },
+            { type: 'specific_music', text: 'Hãy đăng một bài viết kèm bài nhạc "Canon trưởng" và ghi tên tác giả của bài nhạc đó.', targetId: 'mus3', targetAuthor: 'Johann Pachelbel' }
+        ];
+
+        // --- 3. QUẢN LÝ TRẠNG THÁI ---
+        let currentTasks = [];
+        let currentTaskIndex = 0;
+        let selectedImage = null;
+        let selectedMusic = null;
+
+        function initApp() {
+            // Xáo trộn 5 nhiệm vụ để đa dạng trải nghiệm
+            currentTasks = [...allTasksTemplate].sort(() => Math.random() - 0.5);
+            currentTaskIndex = 0;
+            
+            updateTaskUI();
+            
+            // Clear newsfeed
+            document.getElementById('newsfeed').innerHTML = `
+                <div class="text-center text-gray-400 font-semibold mt-10" id="emptyState">
+                    <i class="fa-solid fa-newspaper text-5xl mb-3 opacity-50"></i>
+                    <p>Chưa có bài viết nào. Hãy hoàn thành nhiệm vụ để đăng bài nhé!</p>
+                </div>
+            `;
+            
+            clearMedia();
+            document.getElementById('postContent').value = '';
+            document.getElementById('postAuthor').value = '';
+            
+            const popup = document.getElementById('successPopup');
+            popup.classList.add('hidden');
+            popup.classList.remove('flex');
+
+            // Reset vị trí bảng nhiệm vụ
+            const panel = document.getElementById('taskPanel');
+            panel.style.left = '5%';
+            panel.style.top = '15%';
+        }
+
+        function updateTaskUI() {
+            document.getElementById('taskProgress').innerHTML = `<span>Nhiệm vụ ${currentTaskIndex + 1}/5</span><i class="fa-solid fa-star text-accent"></i>`;
+            document.getElementById('taskDescription').innerText = currentTasks[currentTaskIndex].text;
+            document.getElementById('progressBar').style.width = `${(currentTaskIndex / 5) * 100}%`;
+        }
+
+        function resetApp() {
+            initApp();
+        }
+
+        // --- 4. XỬ LÝ THƯ VIỆN PHƯƠNG TIỆN ---
+        function openMediaPanel(type) {
+            const panel = document.getElementById('mediaPanel');
+            const title = document.getElementById('mediaPanelTitle');
+            const grid = document.getElementById('mediaGrid');
+            
+            panel.classList.add('open');
+            grid.innerHTML = '';
+
+            if (type === 'image') {
+                title.innerHTML = '<i class="fa-regular fa-images mr-2"></i>Chọn Hình ảnh';
+                grid.className = "p-4 flex-1 overflow-y-auto grid grid-cols-2 gap-4 auto-rows-max bg-gray-50";
+                images.forEach(img => {
+                    grid.innerHTML += `
+                        <div onclick="selectMedia('image', '${img.id}')" class="bg-white border-2 border-transparent rounded-[16px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md hover:border-primary transition transform hover:-translate-y-1">
+                            <div class="h-32 bg-gray-200 bg-cover bg-center" style="background-image: url('${img.url}')"></div>
+                            <div class="p-3 text-center text-sm font-bold text-gray-800 line-clamp-1" title="${img.title}">${img.title}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                title.innerHTML = '<i class="fa-solid fa-music mr-2"></i>Chọn Âm nhạc';
+                grid.className = "p-4 flex-1 overflow-y-auto flex flex-col gap-3 bg-gray-50";
+                musics.forEach(mus => {
+                    grid.innerHTML += `
+                        <div onclick="selectMedia('music', '${mus.id}')" class="bg-white border-2 border-transparent rounded-[16px] p-4 cursor-pointer shadow-sm hover:shadow-md hover:border-primary hover:bg-blue-50 transition flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-primary text-xl font-bold"><i class="fa-solid fa-music"></i></div>
+                            <div class="flex-1">
+                                <div class="font-bold text-gray-800 text-lg leading-tight">${mus.title}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function closeMediaPanel() {
+            document.getElementById('mediaPanel').classList.remove('open');
+        }
+
+        function selectMedia(type, id) {
+            if (type === 'image') {
+                selectedImage = images.find(i => i.id === id);
+            } else {
+                selectedMusic = musics.find(m => m.id === id);
+            }
+            closeMediaPanel();
+            renderMediaPreview();
+        }
+
+        function clearMedia() {
+            selectedImage = null;
+            selectedMusic = null;
+            renderMediaPreview();
+        }
+
+        function renderMediaPreview() {
+            const preview = document.getElementById('mediaPreview');
+            const content = document.getElementById('mediaPreviewContent');
+            
+            if (!selectedImage && !selectedMusic) {
+                preview.classList.add('hidden');
+                return;
+            }
+            
+            preview.classList.remove('hidden');
+            let html = '';
+            
+            if (selectedImage) {
+                html += `<img src="${selectedImage.url}" class="max-h-40 rounded-[10px] mx-auto object-contain shadow-sm">`;
+            }
+            
+            if (selectedMusic) {
+                html += `
+                    <div class="w-full max-w-[80%] bg-white border border-blue-100 rounded-[12px] p-2 flex items-center gap-3 shadow-sm">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary"><i class="fa-solid fa-compact-disc animate-spin"></i></div>
+                        <div class="marquee-container flex-1">
+                            <span class="marquee-text text-primary text-sm">🎵 Đang chọn: ${selectedMusic.title}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+        }
+
+        // --- 5. LOGIC KIỂM TRA (VALIDATION) ---
+        function removeAccents(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+        
+        function checkAuthorMatch(input, author) {
+            const normalizedInput = removeAccents(input);
+            const normalizedAuthor = removeAccents(author);
+            return normalizedInput.includes(normalizedAuthor);
+        }
+
+        function submitPost() {
+            const content = document.getElementById('postContent').value.trim();
+            const authorInput = document.getElementById('postAuthor').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            errorMsg.classList.add('hidden');
+
+            if (!authorInput) {
+                errorMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i>Bạn ơi, nhớ ghi tên tác giả vào ô nguồn trước khi đăng nhé!';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            const currentTask = currentTasks[currentTaskIndex];
+            let isValid = false;
+
+            // Xử lý logic từng loại nhiệm vụ
+            if (currentTask.type === 'any_image') {
+                if (!selectedImage) {
+                    showError("Nhiệm vụ này cần có hình ảnh bạn nhé!"); return;
+                }
+                isValid = checkAuthorMatch(authorInput, selectedImage.author);
+            } 
+            else if (currentTask.type === 'any_music') {
+                if (!selectedMusic || selectedImage) {
+                    showError("Nhiệm vụ này CHỈ cần bài nhạc bạn nhé!"); return;
+                }
+                isValid = checkAuthorMatch(authorInput, selectedMusic.author);
+            }
+            else if (currentTask.type === 'image_and_music') {
+                if (!selectedImage || !selectedMusic) {
+                    showError("Nhiệm vụ này cần cả hình ảnh và âm nhạc bạn nhé!"); return;
+                }
+                isValid = checkAuthorMatch(authorInput, selectedImage.author) && checkAuthorMatch(authorInput, selectedMusic.author);
+                if (!isValid && (checkAuthorMatch(authorInput, selectedImage.author) || checkAuthorMatch(authorInput, selectedMusic.author))) {
+                    showError("Bạn nhớ ghi đủ tên tác giả của CẢ hình ảnh và âm nhạc nha!"); return;
+                }
+            }
+            else if (currentTask.type === 'specific_image') {
+                if (!selectedImage || selectedImage.id !== currentTask.targetId) {
+                    showError("Bạn chọn chưa đúng bức tranh được yêu cầu rồi!"); return;
+                }
+                isValid = checkAuthorMatch(authorInput, currentTask.targetAuthor);
+            }
+            else if (currentTask.type === 'specific_music') {
+                if (!selectedMusic || selectedMusic.id !== currentTask.targetId) {
+                    showError("Bạn chọn chưa đúng bài nhạc được yêu cầu rồi!"); return;
+                }
+                isValid = checkAuthorMatch(authorInput, currentTask.targetAuthor);
+            }
+
+            if (!isValid) {
+                showError("Tên tác giả chưa chính xác, bạn kiểm tra lại nhé!");
+                return;
+            }
+
+            // Hợp lệ -> Đăng bài
+            createPostElement(content, authorInput, selectedImage, selectedMusic);
+            
+            // Xóa rỗng form
+            document.getElementById('postContent').value = '';
+            document.getElementById('postAuthor').value = '';
+            clearMedia();
+
+            // Chuyển nhiệm vụ
+            currentTaskIndex++;
+            if (currentTaskIndex < 5) {
+                updateTaskUI();
+            } else {
+                document.getElementById('progressBar').style.width = `100%`;
+                triggerReward();
+            }
+        }
+
+        function showError(text) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i>${text}`;
+            errorMsg.classList.remove('hidden');
+        }
+
+        // --- 6. RENDER BÀI VIẾT (NEWSFEED) ---
+        function createPostElement(content, author, img, mus) {
+            const newsfeed = document.getElementById('newsfeed');
+            const emptyState = document.getElementById('emptyState');
+            if(emptyState) emptyState.remove();
+            
+            const post = document.createElement('div');
+            post.className = 'bg-white rounded-[24px] shadow-sm p-5 border border-gray-100 post-entry flex-shrink-0';
+            
+            let html = `
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-blue-400 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-gray-900 text-lg leading-tight">Hiệp sĩ nhí</div>
+                        <div class="text-xs text-gray-500 font-bold"><i class="fa-solid fa-earth-americas mr-1"></i> Vừa xong</div>
+                    </div>
+                </div>
+            `;
+            
+            if (content) {
+                html += `<div class="text-gray-800 mb-4 font-medium text-[1.05rem]">${content}</div>`;
+            }
+
+            if (img || mus) {
+                html += `<div class="rounded-[16px] overflow-hidden border border-gray-200 bg-gray-50 mb-4 shadow-sm">`;
+                if (img) {
+                    html += `<img src="${img.url}" class="w-full max-h-72 object-cover">`;
+                }
+                if (mus) {
+                    html += `
+                        <div class="p-4 bg-gradient-to-r from-blue-50 to-white text-primary flex items-center gap-3 border-t border-gray-100">
+                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-music text-xl"></i></div>
+                            <div class="marquee-container flex-1">
+                                <span class="marquee-text font-bold text-[1.1rem]">🎵 ${mus.title}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+
+            html += `
+                <div class="bg-blue-50/50 p-3 rounded-[12px] text-sm text-gray-700 border border-blue-100 font-medium">
+                    <i class="fa-solid fa-copyright text-primary mr-1"></i> <span class="font-extrabold text-primary">Nguồn / Tác giả:</span> ${author}
+                </div>
+                <div class="mt-4 flex gap-6 pt-3 border-t border-gray-100 text-gray-500 font-bold text-sm">
+                    <button class="flex items-center gap-2 hover:text-primary hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fa-regular fa-thumbs-up text-lg"></i> Thích</button>
+                    <button class="flex items-center gap-2 hover:text-primary hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fa-regular fa-comment text-lg"></i> Bình luận</button>
+                </div>
+            `;
+            
+            post.innerHTML = html;
+            newsfeed.prepend(post);
+        }
+
+        // --- 7. HIỆU ỨNG HOÀN THÀNH ---
+        function triggerReward() {
+            var duration = 4 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 200 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+
+            const popup = document.getElementById('successPopup');
+            popup.classList.remove('hidden');
+            popup.classList.add('flex');
+        }
+
+        // --- 8. KÉO THẢ TASK PANEL ---
+        const taskPanel = document.getElementById('taskPanel');
+        const header = document.getElementById('taskPanelHeader');
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        header.addEventListener('mousedown', dragStart);
+        header.addEventListener('touchstart', dragStart, {passive: false});
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, {passive: false});
+
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchend', dragEnd);
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            } else {
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+            initialX = taskPanel.offsetLeft;
+            initialY = taskPanel.offsetTop;
+            isDragging = true;
+            taskPanel.style.cursor = 'grabbing';
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            let currentX, currentY;
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+
+            let dx = currentX - startX;
+            let dy = currentY - startY;
+
+            taskPanel.style.left = (initialX + dx) + 'px';
+            taskPanel.style.top = (initialY + dy) + 'px';
+            taskPanel.style.right = 'auto'; // Xóa ghi đè từ tailwind nếu có
+        }
+
+        function dragEnd() {
+            isDragging = false;
+            taskPanel.style.cursor = 'default';
+        }
+
+        // --- KHỞI CHẠY ---
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
