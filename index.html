@@ -253,10 +253,10 @@
             { id: 'img4', title: 'Tiếng thét', author: 'Edvard Munch', url: 'https://upload.wikimedia.org/wikipedia/vi/a/a4/Scr.JPG' },
             { id: 'img5', title: 'Trái Đất mọc từ Mặt Trăng', author: 'William Anders (NASA)', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/NASA-Apollo8-Dec24-Earthrise.jpg/330px-NASA-Apollo8-Dec24-Earthrise.jpg' },
             { id: 'img6', title: 'Chú ong hút mật', author: 'Jon Sullivan', url: 'https://news.fondriest.com/wp-content/uploads/2015/06/HoneyBee.jpg' },
-            { id: 'img7', title: 'Thiếu nữ bên hoa huệ', author: 'Tô Ngọc Vân', url: 'https://upload.wikimedia.org/wikipedia/vi/thumb/9/94/Thieu_nu_ben_hoa_hue.jpg/400px-Thieu_nu_ben_hoa_hue.jpg' },
-            { id: 'img8', title: 'Hai thiếu nữ và em bé', author: 'Tô Ngọc Vân', url: 'https://upload.wikimedia.org/wikipedia/vi/thumb/5/5f/Htlvembe.jpg/400px-Htlvembe.jpg' },
-            { id: 'img9', title: 'Đám cưới chuột', author: 'Tranh dân gian Đông Hồ', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Dam_cuoi_chuot.jpg/640px-Dam_cuoi_chuot.jpg' },
-            { id: 'img10', title: 'Bình văn', author: 'Lê Văn Miến', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/B%C3%ACnh_V%C4%83n_-_L%C3%AA_V%C4%83n_Mi%C3%BFn.jpg/640px-B%C3%ACnh_V%C4%83n_-_L%C3%AA_V%C4%83n_Mi%C3%BFn.jpg' }
+            { id: 'img7', title: 'Thiếu nữ bên hoa huệ', author: 'Tô Ngọc Vân', url: 'https://placehold.co/600x400/e2e8f0/1e3a8a?text=Thieu+Nu+Ben+Hoa+Hue' },
+            { id: 'img8', title: 'Hai thiếu nữ và em bé', author: 'Tô Ngọc Vân', url: 'https://placehold.co/600x400/e2e8f0/1e3a8a?text=Hai+Thieu+Nu+Va+Em+Be' },
+            { id: 'img9', title: 'Đám cưới chuột', author: 'Tranh dân gian Đông Hồ', url: 'https://placehold.co/600x400/e2e8f0/1e3a8a?text=Dam+Cuoi+Chuot' },
+            { id: 'img10', title: 'Bình văn', author: 'Lê Văn Miến', url: 'https://placehold.co/600x400/e2e8f0/1e3a8a?text=Binh+Van' }
         ];
 
         const musics = [
@@ -270,13 +270,7 @@
         ];
 
         // --- 2. CẤU TRÚC NHIỆM VỤ ---
-        const allTasksTemplate = [
-            { type: 'any_image', text: 'Hãy đăng một bài viết có hình ảnh bất kỳ và ghi tên tác giả.' },
-            { type: 'any_music', text: 'Hãy đăng một bài viết chỉ có âm nhạc bất kỳ và ghi tên tác giả.' },
-            { type: 'image_and_music', text: 'Hãy đăng một bài viết có cả hình ảnh và âm nhạc bất kỳ, ghi tên cả 2 tác giả.' },
-            { type: 'specific_image', text: 'Hãy đăng một bài viết kèm bức tranh "Đêm đầy sao" và ghi tên tác giả của bức tranh đó.', targetId: 'img1', targetAuthor: 'Vincent van Gogh' },
-            { type: 'specific_music', text: 'Hãy đăng một bài viết kèm bài nhạc "Canon trưởng" và ghi tên tác giả của bài nhạc đó.', targetId: 'mus3', targetAuthor: 'Johann Pachelbel' }
-        ];
+        // (Sẽ được tạo động trong hàm initApp để randomize bài toán)
 
         // --- 3. QUẢN LÝ TRẠNG THÁI ---
         let currentTasks = [];
@@ -285,8 +279,20 @@
         let selectedMusic = null;
 
         function initApp() {
+            // Chọn ngẫu nhiên 1 ảnh và 1 nhạc cho các nhiệm vụ cụ thể (Nhiệm vụ 4 và 5)
+            const randomImg = images[Math.floor(Math.random() * images.length)];
+            const randomMus = musics[Math.floor(Math.random() * musics.length)];
+
+            const dynamicTasks = [
+                { type: 'any_image', text: 'Hãy đăng một bài viết có hình ảnh bất kỳ và ghi tên tác giả.' },
+                { type: 'any_music', text: 'Hãy đăng một bài viết chỉ có âm nhạc bất kỳ và ghi tên tác giả.' },
+                { type: 'image_and_music', text: 'Hãy đăng một bài viết có cả hình ảnh và âm nhạc bất kỳ, ghi tên cả 2 tác giả.' },
+                { type: 'specific_image', text: `Hãy đăng một bài viết kèm bức tranh "${randomImg.title}" và ghi tên tác giả của bức tranh đó.`, targetId: randomImg.id, targetAuthor: randomImg.author },
+                { type: 'specific_music', text: `Hãy đăng một bài viết kèm bài nhạc "${randomMus.title}" và ghi tên tác giả của bài nhạc đó.`, targetId: randomMus.id, targetAuthor: randomMus.author }
+            ];
+
             // Xáo trộn 5 nhiệm vụ để đa dạng trải nghiệm
-            currentTasks = [...allTasksTemplate].sort(() => Math.random() - 0.5);
+            currentTasks = dynamicTasks.sort(() => Math.random() - 0.5);
             currentTaskIndex = 0;
             
             updateTaskUI();
