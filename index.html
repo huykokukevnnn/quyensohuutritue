@@ -396,9 +396,9 @@
                 grid.innerHTML += `
                     <div onclick="selectMedia('${type}', '${item.id}')" class="bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-blue-500 transition overflow-hidden">
                         ${innerHTML}
-                        <div class="p-2 text-sm">
-                            <div class="font-bold text-gray-900 truncate">${item.title}</div>
-                            <div class="text-xs text-gray-500">Tác giả: ${item.author}</div>
+                        <div class="p-3 text-[15px]">
+                            <div class="font-bold text-gray-900 leading-snug mb-1">${item.title}</div>
+                            <div class="text-sm text-gray-600 font-semibold">Tác giả: <span class="text-[#1877f2]">${item.author}</span></div>
                         </div>
                     </div>
                 `;
@@ -430,7 +430,6 @@
                 `;
             }
             
-            toggleMediaPanel();
             expandComposer();
         }
 
