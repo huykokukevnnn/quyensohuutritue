@@ -257,12 +257,12 @@
         ];
 
         const videos = [
-            { id: 'vid1', title: 'Video 1', author: 'Sarlar', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/1.mp4' },
-            { id: 'vid2', title: 'Video 2', author: 'Zethian', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/2.mp4' },
-            { id: 'vid3', title: 'Video 3', author: 'Riyas', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/3.mp4' },
-            { id: 'vid4', title: 'Video 4', author: 'Kanenori', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/4.mp4' },
-            { id: 'vid5', title: 'Video 5', author: 'Nickype', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/5.mp4' },
-            { id: 'vid6', title: 'Video 6', author: 'Engin Akyurt', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/6.mp4' }
+            { id: 'vid1', title: 'Video 1', author: 'Sarlar', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/1.mp4#t=0.001,4' },
+            { id: 'vid2', title: 'Video 2', author: 'Zethian', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/2.mp4#t=0.001,4' },
+            { id: 'vid3', title: 'Video 3', author: 'Riyas', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/3.mp4#t=0.001,4' },
+            { id: 'vid4', title: 'Video 4', author: 'Kanenori', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/4.mp4#t=0.001,4' },
+            { id: 'vid5', title: 'Video 5', author: 'Nickype', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/5.mp4#t=0.001,4' },
+            { id: 'vid6', title: 'Video 6', author: 'Engin Akyurt', url: 'https://raw.githubusercontent.com/huykokukevnnn/quyensohuutritue/main/6.mp4#t=0.001,4' }
         ];
 
         // --- 2. TẠO TÊN BẠN BÈ ---
@@ -395,7 +395,7 @@
                 } else {
                     innerHTML = `
                         <div class="h-32 bg-gray-800 rounded-t-lg overflow-hidden flex items-center justify-center text-white shrink-0 relative group">
-                            <video src="${item.url}#t=0.001" class="w-full h-full object-contain" muted loop preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0;"></video>
+                            <video src="${item.url}" class="w-full h-full object-contain" muted loop preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0;"></video>
                             <div class="absolute inset-0 bg-black/30 group-hover:bg-black/0 transition pointer-events-none"></div>
                             <i class="fa-solid fa-play text-3xl absolute opacity-70 group-hover:opacity-0 transition-opacity pointer-events-none"></i>
                         </div>
@@ -432,7 +432,7 @@
                 preview.innerHTML = `
                     <div class="relative w-full flex items-center justify-center h-32 bg-gray-800 rounded">
                         <button onclick="clearMedia(event)" class="absolute top-2 right-2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-gray-700 hover:bg-white border border-gray-300 z-10"><i class="fa-solid fa-xmark"></i></button>
-                        <video src="${data.url}#t=0.001" class="w-full h-full object-cover opacity-50" preload="metadata"></video>
+                        <video src="${data.url}" class="w-full h-full object-cover opacity-50" preload="metadata"></video>
                         <i class="fa-solid fa-play text-white text-4xl absolute"></i>
                         <span class="absolute bottom-2 left-2 text-white font-bold bg-black/50 px-2 rounded">${data.title}</span>
                     </div>
@@ -564,7 +564,7 @@
             } else {
                 mediaHTML = `
                     <div onclick="openLightbox('video', '${media.data.url}')" class="w-full h-64 bg-gray-900 flex items-center justify-center mt-2 relative cursor-pointer hover:opacity-95 transition group">
-                        <video src="${media.data.url}#t=0.001" class="w-full h-full object-cover opacity-80" preload="metadata"></video>
+                        <video src="${media.data.url}" class="w-full h-full object-cover opacity-80" preload="metadata"></video>
                         <i class="fa-solid fa-play text-white text-6xl absolute group-hover:scale-110 transition-transform"></i>
                         <span class="absolute bottom-2 right-2 bg-black/70 text-white text-sm px-2 py-1 rounded shadow">${media.data.title}</span>
                     </div>
