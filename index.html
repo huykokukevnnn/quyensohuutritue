@@ -201,7 +201,7 @@
     </div>
 
     <!-- Bảng Thư viện Phương tiện (Slide từ phải) -->
-    <div id="mediaPanel" class="media-panel fixed top-0 right-0 h-full w-[400px] max-w-full bg-white shadow-2xl border-l border-gray-200 flex flex-col z-[150]">
+    <div id="mediaPanel" class="media-panel fixed top-0 right-0 h-full w-[480px] max-w-full bg-white shadow-2xl border-l border-gray-200 flex flex-col z-[150]">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-900">Thêm vào bài viết</h2>
             <button onclick="toggleMediaPanel()" class="w-9 h-9 rounded-full bg-[#e4e6eb] hover:bg-[#d8dadf] flex items-center justify-center transition">
@@ -234,8 +234,7 @@
         </div>
     </div>
 
-    <!-- Lớp phủ tối (Overlay) cho Media Panel -->
-    <div id="panelOverlay" onclick="toggleMediaPanel()" class="fixed inset-0 bg-white/50 backdrop-blur-sm z-[140] hidden transition-opacity"></div>
+    <!-- Overlay đã được gỡ bỏ theo yêu cầu -->
 
     <script>
         // --- 1. DATA ---
@@ -344,16 +343,13 @@
 
         // --- 5. MEDIA PANEL ---
         const mediaPanel = document.getElementById('mediaPanel');
-        const overlay = document.getElementById('panelOverlay');
         const grid = document.getElementById('mediaGrid');
 
         function toggleMediaPanel() {
             if(mediaPanel.classList.contains('open')) {
                 mediaPanel.classList.remove('open');
-                overlay.classList.add('hidden');
             } else {
                 mediaPanel.classList.add('open');
-                overlay.classList.remove('hidden');
                 switchMediaTab('image'); // Default to image
             }
         }
