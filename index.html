@@ -3,94 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiệp sĩ Sở hữu Trí tuệ</title>
-    <!-- Tailwind CSS -->
+    <title>Thử Thách Bản Quyền Trí Tuệ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts: Nunito -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti for Fireworks -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Nunito', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#1877F2',
-                        secondary: '#E4E6EB',
-                        bglight: '#F0F2F5',
-                        accent: '#FFB800'
-                    }
-                }
-            }
-        }
-    </script>
+
     <style>
         body {
-            background-color: #F0F2F5;
-            overflow: hidden; /* Cố định màn hình, không cuộn dọc toàn trang */
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f0f2f5;
         }
 
-        /* Hiệu ứng chữ chạy ngang cho tên bài nhạc */
-        .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            box-sizing: border-box;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-        .marquee-text {
-            display: inline-block;
-            animation: marquee 8s linear infinite;
-            padding-left: 100%;
-            font-weight: bold;
-        }
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        /* Custom Scrollbar cho Newsfeed và Library */
+        /* Tùy chỉnh thanh cuộn */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: transparent; 
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+            background: #bcc0c4;
+            border-radius: 4px;
         }
 
-        /* Hiệu ứng trượt cho Media Panel */
+        .fb-header {
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
         .media-panel {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateX(120%);
-            z-index: 50;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%);
+            z-index: 90;
         }
         .media-panel.open {
             transform: translateX(0);
         }
 
-        /* Task Panel kéo thả */
         #taskPanel {
-            position: absolute;
-            z-index: 60; /* Đặt cao hơn media-panel (50) để luôn nổi lên trên */
+            position: fixed;
+            z-index: 110;
         }
         #taskPanelHeader {
             cursor: grab;
@@ -98,154 +53,192 @@
         #taskPanelHeader:active {
             cursor: grabbing;
         }
-
-        /* Hiệu ứng trượt khi đăng bài */
-        .post-entry {
-            animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        @keyframes slideDown {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
 </head>
-<body class="flex flex-row p-4 gap-4 box-border relative">
+<body class="min-h-screen overflow-x-hidden text-[#050505]">
 
-    <!-- CỘT TRÁI: KHUNG ĐĂNG BÀI & NEWSFEED (60%) -->
-    <div class="w-[60%] flex flex-col gap-4 h-full relative z-10">
+    <!-- Bảng Thử thách (Nổi trên cùng, có thể kéo thả) -->
+    <div id="taskPanel" class="w-80 bg-white rounded-xl shadow-[0_12px_28px_0_rgba(0,0,0,0.2),0_2px_4px_0_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden" style="top: 80px; left: 20px;">
+        <div id="taskPanelHeader" class="bg-[#1877f2] px-4 py-3 flex items-center justify-between text-white select-none">
+            <h2 class="font-bold text-lg"><i class="fa-solid fa-clipboard-list mr-2"></i>Thử thách</h2>
+            <div id="taskProgress" class="font-semibold text-sm bg-blue-700 px-2 py-1 rounded-lg">1/5</div>
+        </div>
+        <div class="p-4">
+            <p id="taskDescription" class="text-[15px] font-medium text-gray-800 mb-4 leading-snug">...</p>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progressBar" class="bg-[#1877f2] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header giả lập Facebook -->
+    <header class="fb-header sticky top-0 z-[100] w-full h-[56px] flex items-center justify-between px-4">
+        <!-- Trái: Logo & Search -->
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-[#1877f2] flex items-center justify-center text-white text-2xl font-bold">f</div>
+            <div class="hidden md:flex items-center bg-[#f0f2f5] rounded-full px-3 py-2 w-60">
+                <i class="fa-solid fa-magnifying-glass text-gray-500 text-sm"></i>
+                <input type="text" placeholder="Tìm kiếm trên Facebook" class="bg-transparent outline-none ml-2 text-[15px] w-full" readonly>
+            </div>
+        </div>
+
+        <!-- Giữa: Icons -->
+        <div class="hidden lg:flex items-center gap-2 h-full">
+            <div class="w-[110px] h-full flex items-center justify-center border-b-[3px] border-[#1877f2] text-[#1877f2] cursor-pointer">
+                <i class="fa-solid fa-house text-2xl"></i>
+            </div>
+            <div class="w-[110px] h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded-xl cursor-pointer transition">
+                <i class="fa-solid fa-tv text-2xl"></i>
+            </div>
+            <div class="w-[110px] h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded-xl cursor-pointer transition">
+                <i class="fa-solid fa-users text-2xl"></i>
+            </div>
+        </div>
+
+        <!-- Phải: Profile -->
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-[#e4e6eb] flex items-center justify-center text-gray-900 cursor-pointer hover:bg-[#d8dadf] transition">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-[#e4e6eb] flex items-center justify-center text-gray-900 cursor-pointer hover:bg-[#d8dadf] transition">
+                <i class="fa-solid fa-bell text-xl"></i>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#1877f2] cursor-pointer border border-[#1877f2]">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout 3 cột -->
+    <div class="flex justify-center mx-auto w-full max-w-[1920px] pt-4 px-0 xl:px-4">
         
-        <!-- Post Composer -->
-        <div class="bg-white rounded-[24px] shadow-sm p-5 flex flex-col gap-3 flex-shrink-0 border border-gray-200 relative overflow-hidden">
-            <div class="flex items-center gap-3 mb-1">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-primary text-2xl font-bold shadow-inner">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg font-bold text-gray-800 leading-tight">Tạo bài chia sẻ</h2>
-                    <p class="text-xs text-gray-500 font-semibold">Cùng tôn trọng tác giả nhé!</p>
-                </div>
+        <!-- Cột Trái (Menu mờ) -->
+        <aside class="w-[360px] hidden xl:block shrink-0 px-2 opacity-40 pointer-events-none select-none overflow-y-auto sticky top-[72px]" style="height: calc(100vh - 72px);">
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-[#1877f2]"><i class="fa-solid fa-user"></i></div>
+                <span class="font-semibold text-[15px]">Tài khoản Học sinh</span>
             </div>
-            
-            <textarea id="postContent" class="w-full bg-bglight rounded-[16px] p-4 border-none outline-none resize-none text-gray-700 font-medium placeholder-gray-500 transition focus:ring-2 focus:ring-blue-200" rows="2" placeholder="Bạn đang nghĩ gì về tác phẩm này?"></textarea>
-            
-            <div class="flex flex-col gap-1">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-feather-pointed text-gray-400"></i>
-                    </div>
-                    <input type="text" id="postAuthor" class="w-full bg-bglight rounded-[16px] pl-10 p-3 border-none outline-none text-gray-700 font-bold placeholder-gray-500 transition focus:ring-2 focus:ring-blue-200" placeholder="Tên tác giả / Nguồn...">
-                </div>
-                <span id="errorMsg" class="text-red-500 text-sm ml-2 hidden font-bold animate-pulse">
-                    <i class="fa-solid fa-circle-exclamation mr-1"></i>Bạn ơi, nhớ ghi tên tác giả vào ô nguồn trước khi đăng nhé!
-                </span>
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div class="w-9 h-9 flex items-center justify-center text-[#1877f2] text-2xl"><i class="fa-solid fa-user-group"></i></div>
+                <span class="font-medium text-[15px]">Bạn bè</span>
             </div>
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div class="w-9 h-9 flex items-center justify-center text-[#1877f2] text-2xl"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <span class="font-medium text-[15px]">Kỷ niệm</span>
+            </div>
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div class="w-9 h-9 flex items-center justify-center text-[#1877f2] text-2xl"><i class="fa-solid fa-bookmark"></i></div>
+                <span class="font-medium text-[15px]">Đã lưu</span>
+            </div>
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div class="w-9 h-9 flex items-center justify-center text-[#1877f2] text-2xl"><i class="fa-solid fa-users-rectangle"></i></div>
+                <span class="font-medium text-[15px]">Nhóm</span>
+            </div>
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div class="w-9 h-9 flex items-center justify-center text-[#1877f2] text-2xl"><i class="fa-solid fa-tv"></i></div>
+                <span class="font-medium text-[15px]">Video</span>
+            </div>
+        </aside>
 
-            <!-- Preview Phương tiện đã chọn -->
-            <div id="mediaPreview" class="hidden relative border-2 border-dashed border-blue-200 rounded-[16px] p-2 bg-blue-50/50 flex flex-col items-center justify-center mt-2 transition-all">
-                <button onclick="clearMedia()" class="absolute -top-3 -right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md text-gray-500 hover:text-red-500 hover:bg-red-50 z-10 transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                <div id="mediaPreviewContent" class="w-full text-center flex flex-col gap-2 items-center"></div>
-            </div>
-
-            <div class="flex justify-between items-center mt-2 pt-3 border-t border-gray-100">
+        <!-- Cột Giữa (Newsfeed & Composer) -->
+        <main class="w-full max-w-[680px] sm:w-[590px] shrink-0 mx-auto px-0 sm:px-4 flex flex-col items-center">
+            
+            <!-- Ô đăng bài -->
+            <div class="w-full bg-white sm:rounded-xl shadow-sm p-3 mb-4">
                 <div class="flex gap-2">
-                    <button onclick="openMediaPanel('image')" class="flex items-center gap-2 px-4 py-2 hover:bg-green-50 rounded-full text-gray-600 font-bold transition duration-200">
-                        <i class="fa-regular fa-image text-green-500 text-xl"></i> Ảnh
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border border-[#1877f2] text-[#1877f2]">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="flex-1">
+                        <textarea id="postContent" class="w-full bg-[#f0f2f5] hover:bg-[#e4e6eb] rounded-[20px] px-4 py-2 resize-none outline-none text-[17px] transition-all cursor-pointer" rows="1" placeholder="Em đang nghĩ gì thế? (Hãy nhớ ghi Nguồn- Tên tác giả ở cuối bài nhé!)" onclick="expandComposer()"></textarea>
+                    </div>
+                </div>
+
+                <!-- Preview file đính kèm trước khi đăng -->
+                <div id="composerPreview" class="hidden mt-3 rounded-lg border border-gray-200 p-2 relative bg-gray-50 max-h-[300px] overflow-hidden flex items-center justify-center">
+                    <!-- Ảnh hoặc Video sẽ hiện ở đây -->
+                </div>
+
+                <div class="border-t border-gray-200 mt-3 pt-2 flex items-center justify-between">
+                    <button onclick="toggleMediaPanel()" class="flex-1 flex items-center justify-center gap-2 hover:bg-[#f0f2f5] py-2 rounded-lg text-gray-600 font-semibold text-[15px] transition">
+                        <i class="fa-solid fa-images text-[#45bd62] text-2xl"></i> Ảnh/Video
                     </button>
-                    <button onclick="openMediaPanel('music')" class="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 rounded-full text-gray-600 font-bold transition duration-200">
-                        <i class="fa-solid fa-music text-blue-500 text-xl"></i> Nhạc
+                    <button class="flex-1 flex items-center justify-center gap-2 hover:bg-[#f0f2f5] py-2 rounded-lg text-gray-600 font-semibold text-[15px] transition pointer-events-none opacity-50">
+                        <i class="fa-solid fa-user-tag text-[#1877f2] text-2xl"></i> Gắn thẻ
+                    </button>
+                    <button class="flex-1 flex items-center justify-center gap-2 hover:bg-[#f0f2f5] py-2 rounded-lg text-gray-600 font-semibold text-[15px] transition pointer-events-none opacity-50">
+                        <i class="fa-regular fa-face-smile text-[#f7b928] text-2xl"></i> Cảm xúc
                     </button>
                 </div>
-                <button onclick="submitPost()" class="bg-primary hover:bg-blue-600 text-white font-bold py-2.5 px-8 rounded-full shadow-lg shadow-blue-500/30 transition transform hover:scale-105 active:scale-95 text-lg">
-                    Đăng bài
-                </button>
+                
+                <div id="composerActions" class="hidden mt-3 w-full">
+                    <button onclick="submitPost()" class="w-full bg-[#1877f2] text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition shadow-sm">Đăng</button>
+                    <div id="errorMsg" class="text-red-600 bg-red-50 p-2 rounded border border-red-200 text-sm mt-2 hidden text-left font-semibold"></div>
+                </div>
             </div>
-        </div>
 
-        <!-- Newsfeed -->
-        <div id="newsfeed" class="flex-1 overflow-y-auto flex flex-col gap-4 pb-4 pr-2 rounded-[20px]">
-            <!-- Các bài viết sẽ hiển thị ở đây -->
-            <div class="text-center text-gray-400 font-semibold mt-10" id="emptyState">
-                <i class="fa-solid fa-newspaper text-5xl mb-3 opacity-50"></i>
-                <p>Chưa có bài viết nào. Hãy hoàn thành nhiệm vụ để đăng bài nhé!</p>
+            <!-- Newsfeed -->
+            <div id="newsfeed" class="w-full flex flex-col gap-4 pb-10">
+                <!-- Posts will be generated here -->
             </div>
-        </div>
+        </main>
+
+        <!-- Cột Phải (Bạn bè) -->
+        <aside class="w-[360px] hidden lg:block shrink-0 px-2 sticky top-[72px] overflow-y-auto" style="height: calc(100vh - 72px);">
+            <div class="flex items-center justify-between mb-2 px-2">
+                <h3 class="text-[#65676b] font-semibold text-[17px]">Người liên hệ</h3>
+                <div class="flex gap-3 text-[#65676b]">
+                    <i class="fa-solid fa-video cursor-pointer"></i>
+                    <i class="fa-solid fa-magnifying-glass cursor-pointer"></i>
+                    <i class="fa-solid fa-ellipsis cursor-pointer"></i>
+                </div>
+            </div>
+            <div id="friendsList" class="flex flex-col">
+                <!-- Tạo qua JS -->
+            </div>
+        </aside>
+
     </div>
 
-    <!-- CỘT PHẢI: BẢNG NHIỆM VỤ & THƯ VIỆN (40%) -->
-    <div class="w-[40%] h-full relative border-l-2 border-gray-200 border-dashed pl-4 flex flex-col items-center justify-center">
+    <!-- Bảng Thư viện Phương tiện (Slide từ phải) -->
+    <div id="mediaPanel" class="media-panel fixed top-0 right-0 h-full w-[400px] max-w-full bg-white shadow-2xl border-l border-gray-200 flex flex-col z-[150]">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">Thêm vào bài viết</h2>
+            <button onclick="toggleMediaPanel()" class="w-9 h-9 rounded-full bg-[#e4e6eb] hover:bg-[#d8dadf] flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-gray-700 text-xl"></i>
+            </button>
+        </div>
         
-        <!-- Draggable Task Panel -->
-        <div id="taskPanel" class="bg-white rounded-[24px] shadow-xl border border-blue-100 w-[90%] left-[5%] top-[15%] p-6 flex flex-col bg-gradient-to-br from-white to-blue-50/30">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3" id="taskPanelHeader">
-                <h3 class="text-xl font-extrabold text-primary flex items-center gap-2">
-                    <i class="fa-solid fa-map-location-dot text-accent"></i> Thử thách
-                </h3>
-                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-4 mb-5 border border-blue-100 shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
-                <div class="text-sm text-blue-600 font-extrabold mb-2 uppercase tracking-wider flex justify-between items-center" id="taskProgress">
-                    <span>Nhiệm vụ 1/5</span>
-                    <i class="fa-solid fa-star text-accent"></i>
-                </div>
-                <div class="text-gray-800 font-bold text-[1.1rem] leading-snug" id="taskDescription">
-                    Đang tải nhiệm vụ...
-                </div>
-            </div>
-
-            <div class="w-full bg-gray-200 rounded-full h-3 mb-1 overflow-hidden shadow-inner">
-                <div id="progressBar" class="bg-gradient-to-r from-primary to-blue-400 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
-            </div>
-            <p class="text-xs text-gray-400 text-center mt-2 font-semibold">Cố gắng lên nhé!</p>
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200">
+            <button id="tabImg" onclick="switchMediaTab('image')" class="flex-1 py-3 text-center font-bold text-[#1877f2] border-b-2 border-[#1877f2] transition">Ảnh</button>
+            <button id="tabVid" onclick="switchMediaTab('video')" class="flex-1 py-3 text-center font-semibold text-gray-500 hover:bg-gray-50 transition">Video</button>
         </div>
 
-        <!-- Media Library Panel -->
-        <div id="mediaPanel" class="media-panel absolute inset-y-0 right-0 left-4 bg-white rounded-[24px] shadow-2xl border border-gray-200 flex flex-col my-2 overflow-hidden">
-            <div class="p-5 bg-gradient-to-r from-primary to-blue-600 text-white flex justify-between items-center rounded-t-[24px]">
-                <h3 class="text-xl font-bold" id="mediaPanelTitle">Thư viện</h3>
-                <button onclick="closeMediaPanel()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div id="mediaGrid" class="p-4 flex-1 overflow-y-auto grid grid-cols-2 gap-4 auto-rows-max bg-gray-50">
-                <!-- Nội dung thư viện render bằng JS -->
-            </div>
+        <div id="mediaGrid" class="flex-1 overflow-y-auto p-2 bg-[#f0f2f5] grid grid-cols-2 gap-2 content-start">
+            <!-- Items rendered here -->
         </div>
     </div>
 
-    <!-- Popup Reward (Hoàn thành) -->
-    <div id="successPopup" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] backdrop-blur-sm">
-        <div class="bg-white rounded-[32px] p-8 flex flex-col items-center max-w-md w-full shadow-2xl transform transition-all scale-100 text-center relative overflow-hidden border-4 border-white">
-            <div class="absolute -top-16 -left-16 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-50"></div>
-            <div class="absolute -bottom-16 -right-16 w-40 h-40 bg-yellow-200 rounded-full blur-3xl opacity-50"></div>
-            
-            <div class="relative">
-                <i class="fa-solid fa-medal text-7xl text-accent mb-2 animate-bounce"></i>
-                <i class="fa-solid fa-star text-yellow-500 absolute top-0 -right-2 animate-ping"></i>
+    <!-- Popup Thành công (Khi qua cả 5 màn) -->
+    <div id="successPopup" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md text-center mx-4 shadow-2xl transform scale-110">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-check text-5xl text-green-500"></i>
             </div>
-            
-            <h2 class="text-3xl font-extrabold text-primary mb-2 mt-4">Tuyệt Vời!</h2>
-            <p class="text-lg text-gray-600 mb-8 font-semibold">
-                Bạn đã vượt qua mọi thử thách và chính thức trở thành <br>
-                <span class="text-primary text-2xl mt-2 block font-black uppercase tracking-wide">Hiệp sĩ Sở hữu Trí tuệ</span>
-            </p>
-            <button onclick="resetApp()" class="bg-gradient-to-r from-primary to-blue-500 hover:from-blue-600 hover:to-blue-700 text-white font-extrabold py-3.5 px-10 rounded-full shadow-xl shadow-blue-500/40 transition transform hover:scale-110 active:scale-95 text-lg flex items-center gap-2">
-                <i class="fa-solid fa-rotate-right"></i> Chơi lại từ đầu
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Tuyệt vời!</h2>
+            <p class="text-lg text-gray-600 mb-8 font-medium">Bạn đã hoàn thành xuất sắc tất cả nhiệm vụ và biết cách tôn trọng quyền tác giả trên mạng xã hội!</p>
+            <button onclick="window.location.reload()" class="bg-[#1877f2] text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-700 transition">
+                <i class="fa-solid fa-rotate-right mr-2"></i> Chơi lại từ đầu
             </button>
         </div>
     </div>
 
+    <!-- Lớp phủ tối (Overlay) cho Media Panel -->
+    <div id="panelOverlay" onclick="toggleMediaPanel()" class="fixed inset-0 bg-white/50 backdrop-blur-sm z-[140] hidden transition-opacity"></div>
+
     <script>
-        // --- 1. DỮ LIỆU PHƯƠNG TIỆN ---
+        // --- 1. DATA ---
         const images = [
             { id: 'img1', title: 'Đêm đầy sao', author: 'Vincent van Gogh', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJxcAWJ6r2_5YO0sEyKsPeOr9BjXhcVSKqIi8Sv91ofguM1pb_ifWmjIVEqdMadGHPZ-fFfubcHy0ImtrOvvI-XpBJc5k2Hn1xfvD3kg&s=10' },
             { id: 'img2', title: 'Mona Lisa', author: 'Leonardo da Vinci', url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXwwxPH6_3mjUprizg7M8DtzDpUJuOcHnI8t3x0mztWt4OV7j8r2fU3Pa9L-pmx7AlPcUiZbjEi7zcJdNNgtQs6w1T7os1tYLo__BFOg&s=10' },
@@ -259,246 +252,271 @@
             { id: 'img10', title: 'Bình văn', author: 'Lê Văn Miến', url: './binhvan.jpg' }
         ];
 
-        const musics = [
-            { id: 'mus1', title: 'Bản giao hưởng số 5', author: 'Ludwig van Beethoven' },
-            { id: 'mus2', title: 'Bốn mùa - Mùa xuân', author: 'Antonio Vivaldi' },
-            { id: 'mus3', title: 'Canon trưởng', author: 'Johann Pachelbel' },
-            { id: 'mus4', title: 'Trống cơm', author: 'Dân ca Bắc Bộ' },
-            { id: 'mus5', title: 'Lý cây bông', author: 'Dân ca Nam Bộ' },
-            { id: 'mus6', title: 'Bèo dạt mây trôi', author: 'Dân ca Quan họ Bắc Ninh' },
-            { id: 'mus7', title: 'Tiến quân ca', author: 'Văn Cao' }
+        const videos = [
+            // Sẽ được thêm video thật sau
+            { id: 'vid1', title: 'Video mẫu 1', author: 'Tác giả A', url: '#' },
+            { id: 'vid2', title: 'Video mẫu 2', author: 'Tác giả B', url: '#' }
         ];
 
-        // --- 2. CẤU TRÚC NHIỆM VỤ ---
-        // (Sẽ được tạo động trong hàm initApp để randomize bài toán)
+        // --- 2. TẠO TÊN BẠN BÈ ---
+        const ho = ["Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ", "Võ", "Đặng", "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý"];
+        const tenDem = ["Văn", "Thị", "Ngọc", "Hoài", "Minh", "Thanh", "Đức", "Thu", "Xuân", "Hải", "Tuấn", "Hồng", "Thúy", "Phương"];
+        const ten = ["Anh", "Bảo", "Châu", "Dương", "Giang", "Hà", "Hải", "Huy", "Hương", "Linh", "Long", "Nam", "Nga", "Nhi", "Phúc", "Quyên", "Sơn", "Trang", "Tùng", "Uyên", "Vy", "Yến"];
 
-        // --- 3. QUẢN LÝ TRẠNG THÁI ---
+        function getRandomName() {
+            const h = ho[Math.floor(Math.random() * ho.length)];
+            const td = tenDem[Math.floor(Math.random() * tenDem.length)];
+            const t = ten[Math.floor(Math.random() * ten.length)];
+            return `${h} ${td} ${t}`;
+        }
+
+        function renderFriends() {
+            const list = document.getElementById('friendsList');
+            let html = '';
+            for(let i = 0; i < 20; i++) {
+                html += `
+                    <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition w-full">
+                        <div class="relative">
+                            <div class="w-9 h-9 rounded-full bg-[#e4e6eb] flex items-center justify-center text-gray-600">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#31a24c] rounded-full border-2 border-[#f0f2f5]"></div>
+                        </div>
+                        <span class="font-semibold text-[15px] text-[#050505]">${getRandomName()}</span>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+        }
+
+        // --- 3. QUẢN LÝ NHIỆM VỤ ---
         let currentTasks = [];
         let currentTaskIndex = 0;
-        let selectedImage = null;
-        let selectedMusic = null;
+        let selectedMedia = null; // { type: 'image'|'video', data: obj }
 
         function initApp() {
-            // Chọn ngẫu nhiên 1 ảnh và 1 nhạc cho các nhiệm vụ cụ thể (Nhiệm vụ 4 và 5)
+            renderFriends();
+
             const randomImg = images[Math.floor(Math.random() * images.length)];
-            const randomMus = musics[Math.floor(Math.random() * musics.length)];
+            const randomVid = videos[Math.floor(Math.random() * videos.length)];
 
             const dynamicTasks = [
-                { type: 'any_image', text: 'Hãy đăng một bài viết có hình ảnh bất kỳ và ghi tên tác giả.' },
-                { type: 'any_music', text: 'Hãy đăng một bài viết chỉ có âm nhạc bất kỳ và ghi tên tác giả.' },
-                { type: 'image_and_music', text: 'Hãy đăng một bài viết có cả hình ảnh và âm nhạc bất kỳ, ghi tên cả 2 tác giả.' },
-                { type: 'specific_image', text: `Hãy đăng một bài viết kèm bức tranh "${randomImg.title}" và ghi tên tác giả của bức tranh đó.`, targetId: randomImg.id, targetAuthor: randomImg.author },
-                { type: 'specific_music', text: `Hãy đăng một bài viết kèm bài nhạc "${randomMus.title}" và ghi tên tác giả của bài nhạc đó.`, targetId: randomMus.id, targetAuthor: randomMus.author }
+                { type: 'any_image', text: 'Hãy đăng một bài viết có hình ảnh bất kỳ và trích "Nguồn- [tên tác giả]".' },
+                { type: 'any_video', text: 'Hãy đăng một bài viết có video bất kỳ và trích "Nguồn- [tên tác giả]".' },
+                { type: 'image_and_video', text: 'Hãy đăng một bài viết vừa có ảnh hoặc video và nhớ ghi "Nguồn- [tên tác giả]".' },
+                { type: 'specific_image', text: `Hãy đăng bức tranh "${randomImg.title}" và trích nguồn tác giả của bức tranh đó.`, targetId: randomImg.id, targetAuthor: randomImg.author, targetType: 'image' },
+                { type: 'specific_video', text: `Hãy đăng video "${randomVid.title}" và trích nguồn tác giả của video đó.`, targetId: randomVid.id, targetAuthor: randomVid.author, targetType: 'video' }
             ];
 
-            // Xáo trộn 5 nhiệm vụ để đa dạng trải nghiệm
             currentTasks = dynamicTasks.sort(() => Math.random() - 0.5);
             currentTaskIndex = 0;
-            
             updateTaskUI();
-            
-            // Clear newsfeed
-            document.getElementById('newsfeed').innerHTML = `
-                <div class="text-center text-gray-400 font-semibold mt-10" id="emptyState">
-                    <i class="fa-solid fa-newspaper text-5xl mb-3 opacity-50"></i>
-                    <p>Chưa có bài viết nào. Hãy hoàn thành nhiệm vụ để đăng bài nhé!</p>
-                </div>
-            `;
-            
-            clearMedia();
-            document.getElementById('postContent').value = '';
-            document.getElementById('postAuthor').value = '';
-            
-            const popup = document.getElementById('successPopup');
-            popup.classList.add('hidden');
-            popup.classList.remove('flex');
-
-            // Reset vị trí bảng nhiệm vụ
-            const panel = document.getElementById('taskPanel');
-            panel.style.left = '5%';
-            panel.style.top = '15%';
         }
 
         function updateTaskUI() {
-            document.getElementById('taskProgress').innerHTML = `<span>Nhiệm vụ ${currentTaskIndex + 1}/5</span><i class="fa-solid fa-star text-accent"></i>`;
+            document.getElementById('taskProgress').innerText = `${currentTaskIndex + 1}/5`;
             document.getElementById('taskDescription').innerText = currentTasks[currentTaskIndex].text;
             document.getElementById('progressBar').style.width = `${(currentTaskIndex / 5) * 100}%`;
         }
 
-        function resetApp() {
-            initApp();
+        // --- 4. TƯƠNG TÁC COMPOSER ---
+        const composer = document.getElementById('postContent');
+        const actions = document.getElementById('composerActions');
+        
+        function expandComposer() {
+            composer.rows = 4;
+            composer.classList.add('bg-white', 'border', 'border-gray-300');
+            composer.classList.remove('bg-[#f0f2f5]');
+            actions.classList.remove('hidden');
         }
 
-        // --- 4. XỬ LÝ THƯ VIỆN PHƯƠNG TIỆN ---
-        function openMediaPanel(type) {
-            const panel = document.getElementById('mediaPanel');
-            const title = document.getElementById('mediaPanelTitle');
-            const grid = document.getElementById('mediaGrid');
-            
-            panel.classList.add('open');
-            grid.innerHTML = '';
+        function resetComposer() {
+            composer.value = '';
+            composer.rows = 1;
+            composer.classList.remove('bg-white', 'border', 'border-gray-300');
+            composer.classList.add('bg-[#f0f2f5]');
+            actions.classList.add('hidden');
+            document.getElementById('errorMsg').classList.add('hidden');
+            selectedMedia = null;
+            document.getElementById('composerPreview').classList.add('hidden');
+            document.getElementById('composerPreview').innerHTML = '';
+        }
 
-            if (type === 'image') {
-                title.innerHTML = '<i class="fa-regular fa-images mr-2"></i>Chọn Hình ảnh';
-                grid.className = "p-4 flex-1 overflow-y-auto grid grid-cols-2 gap-4 auto-rows-max bg-gray-50";
-                images.forEach(img => {
-                    grid.innerHTML += `
-                        <div onclick="selectMedia('image', '${img.id}')" class="bg-white border-2 border-transparent rounded-[16px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md hover:border-primary transition transform hover:-translate-y-1 flex flex-col">
-                            <div class="h-32 bg-gray-100 overflow-hidden flex-shrink-0">
-                                <img src="${img.url}" alt="${img.title}" class="object-cover w-full h-full">
-                            </div>
-                            <div class="p-3 text-center flex flex-col justify-center flex-1">
-                                <div class="text-sm font-bold text-gray-800 line-clamp-1" title="${img.title}">${img.title}</div>
-                                <div class="text-xs text-gray-500 line-clamp-1 mt-0.5" title="Tác giả: ${img.author}">Tác giả: ${img.author}</div>
-                            </div>
-                        </div>
-                    `;
-                });
+        // --- 5. MEDIA PANEL ---
+        const mediaPanel = document.getElementById('mediaPanel');
+        const overlay = document.getElementById('panelOverlay');
+        const grid = document.getElementById('mediaGrid');
+
+        function toggleMediaPanel() {
+            if(mediaPanel.classList.contains('open')) {
+                mediaPanel.classList.remove('open');
+                overlay.classList.add('hidden');
             } else {
-                title.innerHTML = '<i class="fa-solid fa-music mr-2"></i>Chọn Âm nhạc';
-                grid.className = "p-4 flex-1 overflow-y-auto flex flex-col gap-3 bg-gray-50";
-                musics.forEach(mus => {
-                    grid.innerHTML += `
-                        <div onclick="selectMedia('music', '${mus.id}')" class="bg-white border-2 border-transparent rounded-[16px] p-4 cursor-pointer shadow-sm hover:shadow-md hover:border-primary hover:bg-blue-50 transition flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-primary text-xl font-bold"><i class="fa-solid fa-music"></i></div>
-                            <div class="flex-1">
-                                <div class="font-bold text-gray-800 text-lg leading-tight">${mus.title}</div>
-                                <div class="text-sm text-gray-500 font-semibold mt-1">Tác giả: ${mus.author}</div>
-                            </div>
-                        </div>
-                    `;
-                });
+                mediaPanel.classList.add('open');
+                overlay.classList.remove('hidden');
+                switchMediaTab('image'); // Default to image
             }
         }
 
-        function closeMediaPanel() {
-            document.getElementById('mediaPanel').classList.remove('open');
+        function switchMediaTab(type) {
+            const tabImg = document.getElementById('tabImg');
+            const tabVid = document.getElementById('tabVid');
+
+            if(type === 'image') {
+                tabImg.className = "flex-1 py-3 text-center font-bold text-[#1877f2] border-b-2 border-[#1877f2] transition";
+                tabVid.className = "flex-1 py-3 text-center font-semibold text-gray-500 hover:bg-gray-50 transition";
+                renderMediaGrid(images, 'image');
+            } else {
+                tabVid.className = "flex-1 py-3 text-center font-bold text-[#1877f2] border-b-2 border-[#1877f2] transition";
+                tabImg.className = "flex-1 py-3 text-center font-semibold text-gray-500 hover:bg-gray-50 transition";
+                renderMediaGrid(videos, 'video');
+            }
+        }
+
+        function renderMediaGrid(dataArr, type) {
+            grid.innerHTML = '';
+            if(dataArr.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center text-gray-500 p-4">Chưa có ${type} nào.</div>`;
+                return;
+            }
+
+            dataArr.forEach(item => {
+                let innerHTML = '';
+                if(type === 'image') {
+                    // Object-contain để không cắt ảnh
+                    innerHTML = `
+                        <div class="h-32 bg-gray-200 rounded-t-lg overflow-hidden flex items-center justify-center">
+                            <img src="${item.url}" class="w-full h-full object-contain bg-black">
+                        </div>
+                    `;
+                } else {
+                    innerHTML = `
+                        <div class="h-32 bg-gray-800 rounded-t-lg flex items-center justify-center text-white">
+                            <i class="fa-solid fa-play text-3xl"></i>
+                        </div>
+                    `;
+                }
+
+                grid.innerHTML += `
+                    <div onclick="selectMedia('${type}', '${item.id}')" class="bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-blue-500 transition overflow-hidden">
+                        ${innerHTML}
+                        <div class="p-2 text-sm">
+                            <div class="font-bold text-gray-900 truncate">${item.title}</div>
+                            <div class="text-xs text-gray-500">Tác giả: ${item.author}</div>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         function selectMedia(type, id) {
-            if (type === 'image') {
-                selectedImage = images.find(i => i.id === id);
-            } else {
-                selectedMusic = musics.find(m => m.id === id);
-            }
-            // Không tự động tắt thư viện nữa để học sinh chủ động tắt
-            renderMediaPreview();
-        }
-
-        function clearMedia() {
-            selectedImage = null;
-            selectedMusic = null;
-            renderMediaPreview();
-        }
-
-        function renderMediaPreview() {
-            const preview = document.getElementById('mediaPreview');
-            const content = document.getElementById('mediaPreviewContent');
+            let data = type === 'image' ? images.find(i => i.id === id) : videos.find(v => v.id === id);
+            selectedMedia = { type, data };
             
-            if (!selectedImage && !selectedMusic) {
-                preview.classList.add('hidden');
-                return;
-            }
-            
+            // Hiện preview trong ô compose
+            const preview = document.getElementById('composerPreview');
             preview.classList.remove('hidden');
-            let html = '';
             
-            if (selectedImage) {
-                html += `<img src="${selectedImage.url}" alt="${selectedImage.title}" class="max-h-40 rounded-[10px] mx-auto object-contain shadow-sm" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Lỗi+Hình+Ảnh';">`;
-            }
-            
-            if (selectedMusic) {
-                html += `
-                    <div class="w-full max-w-[80%] bg-white border border-blue-100 rounded-[12px] p-2 flex items-center gap-3 shadow-sm">
-                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary"><i class="fa-solid fa-compact-disc animate-spin"></i></div>
-                        <div class="marquee-container flex-1">
-                            <span class="marquee-text text-primary text-sm">🎵 Đang chọn: ${selectedMusic.title}</span>
-                        </div>
+            if(type === 'image') {
+                preview.innerHTML = `
+                    <div class="relative w-full">
+                        <button onclick="clearMedia(event)" class="absolute top-2 right-2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-gray-700 hover:bg-white border border-gray-300 z-10"><i class="fa-solid fa-xmark"></i></button>
+                        <img src="${data.url}" class="w-full max-h-[250px] object-contain rounded bg-black">
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = `
+                    <div class="relative w-full flex items-center justify-center h-32 bg-gray-800 rounded">
+                        <button onclick="clearMedia(event)" class="absolute top-2 right-2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-gray-700 hover:bg-white border border-gray-300 z-10"><i class="fa-solid fa-xmark"></i></button>
+                        <i class="fa-solid fa-play text-white text-4xl"></i>
+                        <span class="absolute bottom-2 left-2 text-white font-bold">${data.title}</span>
                     </div>
                 `;
             }
             
-            content.innerHTML = html;
+            toggleMediaPanel();
+            expandComposer();
         }
 
-        // --- 5. LOGIC KIỂM TRA (VALIDATION) ---
-        function removeAccents(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        function clearMedia(e) {
+            if(e) e.stopPropagation();
+            selectedMedia = null;
+            document.getElementById('composerPreview').classList.add('hidden');
+            document.getElementById('composerPreview').innerHTML = '';
         }
-        
-        function checkAuthorMatch(input, author) {
-            const normalizedInput = removeAccents(input).trim();
-            const normalizedAuthor = removeAccents(author).trim();
-            return normalizedInput === normalizedAuthor;
+
+        // --- 6. LOGIC XÁC THỰC (VALIDATION) ---
+        function removeAccents(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        }
+
+        function checkAuthorMatch(content, author) {
+            const normalizedContent = removeAccents(content).replace(/\s+/g, ' ');
+            const normalizedAuthor = removeAccents(author).replace(/\s+/g, ' ');
+            return normalizedContent.includes(normalizedAuthor);
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.innerText = msg;
+            el.classList.remove('hidden');
         }
 
         function submitPost() {
-            const content = document.getElementById('postContent').value.trim();
-            const authorInput = document.getElementById('postAuthor').value.trim();
-            const errorMsg = document.getElementById('errorMsg');
+            const content = composer.value.trim();
+            const currentTask = currentTasks[currentTaskIndex];
             
-            errorMsg.classList.add('hidden');
-
-            if (!authorInput) {
-                errorMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i>Bạn ơi, nhớ ghi tên tác giả vào ô nguồn trước khi đăng nhé!';
-                errorMsg.classList.remove('hidden');
+            if(!selectedMedia) {
+                showError("Bạn chưa đính kèm Ảnh hoặc Video nào!");
                 return;
             }
 
-            const currentTask = currentTasks[currentTaskIndex];
-            let isValid = false;
+            if(!content) {
+                showError("Bạn chưa nhập nội dung bài viết. Đừng quên ghi nguồn nhé!");
+                return;
+            }
 
-            // Xử lý logic từng loại nhiệm vụ
-            if (currentTask.type === 'any_image') {
-                if (!selectedImage) {
-                    showError("Nhiệm vụ này cần có hình ảnh bạn nhé!"); return;
-                }
-                isValid = checkAuthorMatch(authorInput, selectedImage.author);
+            let isValid = false;
+            let requiredAuthor = "";
+
+            if(currentTask.type === 'any_image') {
+                if(selectedMedia.type !== 'image') { showError("Nhiệm vụ này cần đăng Hình ảnh!"); return; }
+                requiredAuthor = selectedMedia.data.author;
             } 
-            else if (currentTask.type === 'any_music') {
-                if (!selectedMusic || selectedImage) {
-                    showError("Nhiệm vụ này CHỈ cần bài nhạc bạn nhé!"); return;
-                }
-                isValid = checkAuthorMatch(authorInput, selectedMusic.author);
+            else if(currentTask.type === 'any_video') {
+                if(selectedMedia.type !== 'video') { showError("Nhiệm vụ này cần đăng Video!"); return; }
+                requiredAuthor = selectedMedia.data.author;
             }
-            else if (currentTask.type === 'image_and_music') {
-                if (!selectedImage || !selectedMusic) {
-                    showError("Nhiệm vụ này cần cả hình ảnh và âm nhạc bạn nhé!"); return;
-                }
-                isValid = checkAuthorMatch(authorInput, selectedImage.author) && checkAuthorMatch(authorInput, selectedMusic.author);
-                if (!isValid && (checkAuthorMatch(authorInput, selectedImage.author) || checkAuthorMatch(authorInput, selectedMusic.author))) {
-                    showError("Bạn nhớ ghi đủ tên tác giả của CẢ hình ảnh và âm nhạc nha!"); return;
-                }
+            else if(currentTask.type === 'image_and_video') {
+                // Ta chỉ có 1 slot media, cho phép ảnh hoặc video
+                requiredAuthor = selectedMedia.data.author;
             }
-            else if (currentTask.type === 'specific_image') {
-                if (!selectedImage || selectedImage.id !== currentTask.targetId) {
+            else if(currentTask.type === 'specific_image') {
+                if(selectedMedia.type !== 'image' || selectedMedia.data.id !== currentTask.targetId) {
                     showError("Bạn chọn chưa đúng bức tranh được yêu cầu rồi!"); return;
                 }
-                isValid = checkAuthorMatch(authorInput, currentTask.targetAuthor);
+                requiredAuthor = currentTask.targetAuthor;
             }
-            else if (currentTask.type === 'specific_music') {
-                if (!selectedMusic || selectedMusic.id !== currentTask.targetId) {
-                    showError("Bạn chọn chưa đúng bài nhạc được yêu cầu rồi!"); return;
+            else if(currentTask.type === 'specific_video') {
+                if(selectedMedia.type !== 'video' || selectedMedia.data.id !== currentTask.targetId) {
+                    showError("Bạn chọn chưa đúng video được yêu cầu rồi!"); return;
                 }
-                isValid = checkAuthorMatch(authorInput, currentTask.targetAuthor);
+                requiredAuthor = currentTask.targetAuthor;
             }
 
-            if (!isValid) {
-                showError("Bạn ghi sai tên tác giả rồi! Phải ghi chính xác tên tác giả/nguồn nhé.");
+            isValid = checkAuthorMatch(content, requiredAuthor);
+
+            if(!isValid) {
+                showError("Bạn chưa ghi đúng tên tác giả vào bài viết! Hãy nhớ cú pháp: Nguồn- Tên tác giả");
                 return;
             }
 
-            // Hợp lệ -> Đăng bài
-            createPostElement(content, authorInput, selectedImage, selectedMusic);
-            
-            // Xóa rỗng form
-            document.getElementById('postContent').value = '';
-            document.getElementById('postAuthor').value = '';
-            clearMedia();
+            // Đăng bài
+            createPost(content, selectedMedia);
+            resetComposer();
 
-            // Chuyển nhiệm vụ
             currentTaskIndex++;
-            if (currentTaskIndex < 5) {
+            if(currentTaskIndex < 5) {
                 updateTaskUI();
             } else {
                 document.getElementById('progressBar').style.width = `100%`;
@@ -506,74 +524,58 @@
             }
         }
 
-        function showError(text) {
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i>${text}`;
-            errorMsg.classList.remove('hidden');
-        }
-
-        // --- 6. RENDER BÀI VIẾT (NEWSFEED) ---
-        function createPostElement(content, author, img, mus) {
-            const newsfeed = document.getElementById('newsfeed');
-            const emptyState = document.getElementById('emptyState');
-            if(emptyState) emptyState.remove();
-            
+        function createPost(content, media) {
+            const feed = document.getElementById('newsfeed');
             const post = document.createElement('div');
-            post.className = 'bg-white rounded-[24px] shadow-sm p-5 border border-gray-100 post-entry flex-shrink-0';
-            
-            let html = `
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-blue-400 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
-                        <i class="fa-solid fa-user-astronaut"></i>
+            post.className = "bg-white sm:rounded-xl shadow-sm border border-gray-100 flex flex-col pt-3 pb-2";
+
+            let mediaHTML = '';
+            if(media.type === 'image') {
+                mediaHTML = `<img src="${media.data.url}" class="w-full max-h-[500px] object-contain bg-black mt-2">`;
+            } else {
+                mediaHTML = `
+                    <div class="w-full h-64 bg-gray-900 flex items-center justify-center mt-2 relative">
+                        <i class="fa-solid fa-play text-white text-5xl opacity-80"></i>
+                        <span class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">${media.data.title}</span>
                     </div>
-                    <div>
-                        <div class="font-extrabold text-gray-900 text-lg leading-tight">Hiệp sĩ nhí</div>
-                        <div class="text-xs text-gray-500 font-bold"><i class="fa-solid fa-earth-americas mr-1"></i> Vừa xong</div>
-                    </div>
-                </div>
-            `;
-            
-            if (content) {
-                html += `<div class="text-gray-800 mb-4 font-medium text-[1.05rem]">${content}</div>`;
+                `;
             }
 
-            if (img || mus) {
-                html += `<div class="rounded-[16px] overflow-hidden border border-gray-200 bg-gray-50 mb-4 shadow-sm">`;
-                if (img) {
-                    html += `<img src="${img.url}" class="w-full max-h-72 object-cover">`;
-                }
-                if (mus) {
-                    html += `
-                        <div class="p-4 bg-gradient-to-r from-blue-50 to-white text-primary flex items-center gap-3 border-t border-gray-100">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-music text-xl"></i></div>
-                            <div class="marquee-container flex-1">
-                                <span class="marquee-text font-bold text-[1.1rem]">🎵 ${mus.title}</span>
-                            </div>
+            // Trích xuất lại tên tác giả từ chuỗi (mô phỏng tag)
+            // Vì học sinh gõ Nguồn- ABC, chữ này nằm nguyên trong nội dung.
+            // Để đẹp mắt, ta tô đậm nội dung.
+            
+            // Thay thế dòng chữ sang HTML an toàn
+            const safeContent = content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            post.innerHTML = `
+                <div class="px-4 flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 border border-[#1877f2] flex items-center justify-center text-[#1877f2]"><i class="fa-solid fa-user"></i></div>
+                        <div>
+                            <div class="font-bold text-[15px] text-[#050505]">Tài khoản Học sinh</div>
+                            <div class="text-xs text-[#65676b] font-medium flex items-center gap-1">Vừa xong <i class="fa-solid fa-earth-americas"></i></div>
                         </div>
-                    `;
-                }
-                html += `</div>`;
-            }
-
-            html += `
-                <div class="bg-blue-50/50 p-3 rounded-[12px] text-sm text-gray-700 border border-blue-100 font-medium">
-                    <i class="fa-solid fa-copyright text-primary mr-1"></i> <span class="font-extrabold text-primary">Nguồn / Tác giả:</span> ${author}
+                    </div>
+                    <div class="text-[#65676b] cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100"><i class="fa-solid fa-ellipsis"></i></div>
                 </div>
-                <div class="mt-4 flex gap-6 pt-3 border-t border-gray-100 text-gray-500 font-bold text-sm">
-                    <button class="flex items-center gap-2 hover:text-primary hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fa-regular fa-thumbs-up text-lg"></i> Thích</button>
-                    <button class="flex items-center gap-2 hover:text-primary hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fa-regular fa-comment text-lg"></i> Bình luận</button>
+                <div class="px-4 py-1 text-[15px] text-[#050505] whitespace-pre-wrap">${safeContent}</div>
+                ${mediaHTML}
+                <div class="px-4 mt-2 pt-2 border-t border-gray-200 flex text-[#65676b] font-semibold text-[15px]">
+                    <button class="flex-1 py-1.5 hover:bg-gray-100 rounded flex items-center justify-center gap-2"><i class="fa-regular fa-thumbs-up"></i> Thích</button>
+                    <button class="flex-1 py-1.5 hover:bg-gray-100 rounded flex items-center justify-center gap-2"><i class="fa-regular fa-comment"></i> Bình luận</button>
+                    <button class="flex-1 py-1.5 hover:bg-gray-100 rounded flex items-center justify-center gap-2"><i class="fa-solid fa-share"></i> Chia sẻ</button>
                 </div>
             `;
-            
-            post.innerHTML = html;
-            newsfeed.prepend(post);
+
+            feed.prepend(post);
         }
 
-        // --- 7. HIỆU ỨNG HOÀN THÀNH ---
+        // --- 7. HIỆU ỨNG THẮNG CUỘC ---
         function triggerReward() {
             var duration = 4 * 1000;
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 200 };
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 300 };
 
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
@@ -586,9 +588,7 @@
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
 
-            const popup = document.getElementById('successPopup');
-            popup.classList.remove('hidden');
-            popup.classList.add('flex');
+            document.getElementById('successPopup').classList.remove('hidden');
         }
 
         // --- 8. KÉO THẢ TASK PANEL ---
@@ -638,7 +638,7 @@
 
             taskPanel.style.left = (initialX + dx) + 'px';
             taskPanel.style.top = (initialY + dy) + 'px';
-            taskPanel.style.right = 'auto'; // Xóa ghi đè từ tailwind nếu có
+            taskPanel.style.right = 'auto'; 
         }
 
         function dragEnd() {
@@ -646,9 +646,8 @@
             taskPanel.style.cursor = 'default';
         }
 
-        // --- KHỞI CHẠY ---
+        // Khởi động
         window.onload = initApp;
-
     </script>
 </body>
 </html>
