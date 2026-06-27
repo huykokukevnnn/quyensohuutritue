@@ -381,24 +381,24 @@
                 if(type === 'image') {
                     // Object-contain để không cắt ảnh
                     innerHTML = `
-                        <div class="h-32 bg-gray-200 rounded-t-lg overflow-hidden flex items-center justify-center">
+                        <div class="h-32 bg-gray-200 rounded-t-lg overflow-hidden flex items-center justify-center shrink-0">
                             <img src="${item.url}" class="w-full h-full object-contain bg-black">
                         </div>
                     `;
                 } else {
                     innerHTML = `
-                        <div class="h-32 bg-gray-800 rounded-t-lg flex items-center justify-center text-white">
+                        <div class="h-32 bg-gray-800 rounded-t-lg flex items-center justify-center text-white shrink-0">
                             <i class="fa-solid fa-play text-3xl"></i>
                         </div>
                     `;
                 }
 
                 grid.innerHTML += `
-                    <div onclick="selectMedia('${type}', '${item.id}')" class="bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-blue-500 transition overflow-hidden">
+                    <div onclick="selectMedia('${type}', '${item.id}')" class="bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-blue-500 transition overflow-hidden flex flex-col min-h-[220px]">
                         ${innerHTML}
-                        <div class="p-3 text-[15px]">
+                        <div class="p-3 text-[15px] flex-1 flex flex-col">
                             <div class="font-bold text-gray-900 leading-snug mb-1">${item.title}</div>
-                            <div class="text-sm text-gray-600 font-semibold">Tác giả: <span class="text-[#1877f2]">${item.author}</span></div>
+                            <div class="text-sm text-gray-600 font-semibold mt-auto pt-1">Tác giả: <span class="text-[#1877f2]">${item.author}</span></div>
                         </div>
                     </div>
                 `;
